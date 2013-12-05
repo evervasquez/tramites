@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../actionbarsherlock/actionbarsherlock.iml" filepath="$PROJECT_DIR$/../actionbarsherlock/actionbarsherlock.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../android-uitableview/android-uitableview.iml" filepath="$PROJECT_DIR$/../android-uitableview/android-uitableview.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tramites.iml" filepath="$PROJECT_DIR$/tramites.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../workspace.iml" filepath="$PROJECT_DIR$/../workspace.iml" />
+    </modules>
+  </component>
+</project>
+

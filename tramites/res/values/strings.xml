@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Tramites MPSM</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="subtitulo_buscar">Ingrese N° Expediente, Nombre, DNI o RUC</string>
+    <string name="titulo_buscar">Buscar Trámite</string>
+    <string name="boton_tramite">Iniciar Busqueda</string>
+    <string name="cargar">Click Para Cargar Más</string>
+    <string name="title_activity_detalle_tramite">Detalle_tramite</string>
+    <string name="title_activity_detalle_pasos">Detalle_pasos</string>
+    <string name="favoritos">Favoritos</string>
+    <string name="compartir">Compartir</string>
+	<string name="titulo_compartir">Compartir</string>
+	<string name="frase">Obras con Transparencia</string>
+</resources>

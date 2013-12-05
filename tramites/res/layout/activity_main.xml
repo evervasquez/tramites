@@ -1,0 +1,86 @@
+<LinearLayout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity" >
+
+    <librerias.CustomTextView
+        android:id="@+id/natively_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5sp"
+        android:layout_marginTop="5dp"
+        android:text="@string/titulo_buscar"
+        android:textSize="30sp" />
+
+    <EditText
+        android:id="@+id/text_tramite"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5sp"
+        android:layout_marginRight="5sp"
+        android:hint="@string/subtitulo_buscar"
+        android:textSize="14sp" >
+
+        <requestFocus android:layout_width="match_parent" />
+    </EditText>
+
+    <Button
+        android:id="@+id/btn_buscar"
+        style="@style/ButtonText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/btn_blue"
+        android:text="@string/boton_tramite" />
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/twitterimg"
+            android:layout_centerHorizontal="true" >
+
+            <ImageView
+                android:id="@+id/logompsm"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/favoritos"
+                android:src="@drawable/mpsmlogo" />
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/faceimg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:contentDescription="@string/favoritos"
+            android:src="@drawable/facebook" />
+
+        <ImageView
+            android:id="@+id/twitterimg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="32dp"
+            android:contentDescription="@string/favoritos"
+            android:src="@drawable/twitter" />
+
+        <librerias.CustomTextView
+            android:id="@+id/txtfrase"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toLeftOf="@+id/twitterimg"
+            android:gravity="bottom"
+            android:text="@string/frase"
+            android:textSize="22sp" />
+    </RelativeLayout>
+
+</LinearLayout>
