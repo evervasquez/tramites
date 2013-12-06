@@ -1,27 +1,28 @@
 package com.mpsm.tramites;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Vector;
 
 import librerias.ActivityProgress_detalle;
+import librerias.ConstantsUtils;
 import librerias.ProgressFragment;
 import librerias.Tramite_model;
-import librerias.UTF8;
-import librerias.conecta_ws;
+import librerias.WS;
 import librerias.dialogos;
 import librerias.verifica_internet;
 
-import org.ksoap2.serialization.SoapObject;
+import org.json.JSONObject;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ScrollView;
-import android.widget.Toast;
 import br.com.dina.ui.widget.UITableView;
 import br.com.dina.ui.widget.UITableView.ClickListener;
 
@@ -32,15 +33,16 @@ import com.handmark.pulltorefresh.library.PullToRefreshScrollView;
 public class Tramites extends ProgressFragment {
 	// para el polltorefresh
 	public int ESTADO_PULL = 0;
+	private static final String TAG = "Tramites";
 	public UITableView tableView = null;
 	PullToRefreshScrollView mPullRefreshScrollView;
 	ScrollView mScrollView;
 
 	// fin
 	View mContentView;
-	String cadena_buscada;
-	conecta_ws objetoBD;
-	SoapObject result;
+	public String cadena_buscada;
+	WS objetoBD;
+	private String content;
 	Intent intent;
 	ArrayList<Tramite_model> datos_tramite;
 	Tramite_model datos_t;
@@ -48,9 +50,9 @@ public class Tramites extends ProgressFragment {
 	int factor = 10;
 	String limite;
 	ProgressDialog pd;
-	String categoria;
+	String categoria,datos;
 	dialogos dialog;
-	String METHOD_NAME = "listar_tramites";
+	private static final String METHOD_NAME = "listarTramitesMovil";
 	String[] nom_variables;
 	String[] datos_variables;
 	asyncTramites tarea;
@@ -127,19 +129,13 @@ public class Tramites extends ProgressFragment {
 	private void obtainData( UITableView param) {
 		calculo = limite_entero * factor;
 		limite = "" + calculo;
-		// Toast.makeText(getSherlockActivity(), limite,
-		// Toast.LENGTH_SHORT).show();
-		nom_variables = new String[] { "codigo", "limite" };// nombres de las //
-															// variables
-		datos_variables = new String[] { cadena_buscada, limite };// datos de
-																	// las
 		if (verifica_internet.checkConex(getSherlockActivity())) {
-			tarea = new asyncTramites(param);
+			tarea = new asyncTramites(cadena_buscada,limite,param);
 			tarea.execute();
 
 		} else {
 			dialog = new dialogos();
-			dialog.Dialogo_Alerta(getSherlockActivity(),
+			dialogos.Dialogo_Alerta(getSherlockActivity(),
 					"nesecita estar conectado a internet");
 			return;
 		}
@@ -148,127 +144,57 @@ public class Tramites extends ProgressFragment {
 	@SuppressWarnings("rawtypes")
 	private class asyncTramites extends AsyncTask {
 		private UITableView tableView1;
-		SoapObject transaction0;
+		private String codigo, limite;
 
 		// long [] ids;
-		public asyncTramites(UITableView param1) {
+		public asyncTramites(String cod,String limit,UITableView param1) {
 			// TODO Auto-generated constructor stub
-			tableView1 = param1;
+			this.tableView1 = param1;
+			this.codigo = cod;
+			this.limite = limit;
 		}
+		
+		protected void onPreExecute() {
+			if (ESTADO_PULL != 1) {
+				//setContentShown(false);
+				try {
+					String param = URLEncoder.encode("codigo", "UTF-8") + "="
+							+ URLEncoder.encode(this.codigo, "UTF-8");
+					param += "&" + URLEncoder.encode("limite", "UTF-8") + "="
+							+ URLEncoder.encode(this.limite, "UTF-8");
+					datos = param;
+				} catch(UnsupportedEncodingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			} else {
+				//setContentShown(true);
+			}
+		}
+		
 		@Override
 		protected Object doInBackground(Object... params) {
 			// TODO Auto-generated method stub
-			objetoBD = new conecta_ws();
+			
+			objetoBD = new WS(getSherlockActivity().getApplicationContext(),ConstantsUtils.CONTROLLER+METHOD_NAME,datos);
 
 			// comprobamos si tenemos conexion a internet
-			result = (SoapObject) objetoBD.get_ResultadoWS(
-					getSherlockActivity(), nom_variables, datos_variables,
-					METHOD_NAME);
+			content = objetoBD.getResponse();
 			return 1;
 		}
 
-		protected void onPreExecute() {
-			if (ESTADO_PULL != 1) {
-				setContentShown(false);
-			} else {
-				setContentShown(true);
-			}
-		}
+		
 
 		protected void onPostExecute(Object res) {
 			try {
-				if(ESTADO_PULL!=1){
-				CustomClickListener listener = new CustomClickListener();
-				tableView1.setClickListener(listener);
-				}
-				setContentShown(true);
-				Vector<?> transactions = (Vector<?>) result
-						.getProperty("tramite_list");
-				
-				if(transactions.size()>0){
-				for (int i = 0; i < transactions.size(); i++) {
-					transaction0 = (SoapObject) transactions.elementAt(i);// recupero
-																			// el
-																			// primer
-																			// array
+				String OutputData = "";
+				JSONObject jsonResponse;
+				ArrayList<String> datosUsusario;
 
-					id_tramite1.add(transaction0.getProperty("id_tramite")
-							.toString().trim());
-					String tramite = transaction0.getProperty("tramite")
-							.toString().trim();
-					String codigo = transaction0.getProperty("codigo")
-							.toString().trim();
-					String fecha_inicio = transaction0
-							.getProperty("fecha_inicio").toString().trim();
-					String solicitante = transaction0
-							.getProperty("solicitante").toString().trim();
-					String dni = transaction0.getProperty("dni").toString()
-							.trim();
-					String ruc = transaction0.getProperty("ruc").toString()
-							.trim();
-					tipo1.add(transaction0.getProperty("tipo").toString()
-							.trim());
-					
-					// tipo[i] =
-					// transaction0.getProperty("tipo").toString().trim();
-					String estado = transaction0.getProperty("estado")
-							.toString().trim();
-					String numero_folios = transaction0
-							.getProperty("numero_folios").toString().trim();
-					String usuario = transaction0.getProperty("usuario")
-							.toString().trim();
+				pd.dismiss();
 
-					switch (estado.charAt(0)) {
-					case 'T':
-						estado = "FINALIZADO";
-						break;
-					case 'O':
-						estado = "OBSERVADO";
-						break;
-					case 'A':
-						estado = "EN PROCESO";
-						break;
-					default:
-						break;
-					}
-
-					datos_t = new Tramite_model();
-					datos_t.setId_tramite(id_tramite1.get(para_lista + i));// 0
-					datos_t.setTramite(tramite);// 1
-					datos_t.setCodigo(codigo);// 2
-					datos_t.setFecha_inicio(fecha_inicio);// 3
-					datos_t.setSolicitante(solicitante);// 4
-					datos_t.setDni(dni);// 5
-					datos_t.setRuc(ruc);// 6
-					datos_t.setTipo(tipo1.get(para_lista + i));// 7
-					datos_t.setEstado(estado);// 8
-					datos_t.setNumero_folios(numero_folios);// 9
-					datos_t.setUsuario(usuario);// 10
-
-					datos_tramite.add(datos_t);
-					// lleno al listveiw
-
-				}
-				if(ESTADO_PULL==1){
-					tableView1.clear();	
-				}
-				for( int i = 0 ; i < datos_tramite.size() ; i++ ){
-					tableView1
-					.addBasicItem(UTF8.convertirA_UTF8(datos_tramite.get(i).getTramite()),
-							"Código : " + UTF8.convertirA_UTF8(datos_tramite.get(i).getCodigo())+ 
-							"| fecha: " + datos_tramite.get(i).getFecha_inicio(), "Solicitante: "
-							+ UTF8.convertirA_UTF8(datos_tramite.get(i).getSolicitante()),
-							"DNI: " + datos_tramite.get(i).getDni() + " | RUC: " + datos_tramite.get(i).getRuc(),
-							"Estado: " + datos_tramite.get(i).getEstado()
-							+ " | Tipo: TRÁMITE EXTERNO");
-					}
-
-				tableView1.commit();
-				mPullRefreshScrollView.onRefreshComplete();
-				// fin
-				}else{
-				Toast.makeText(getSherlockActivity(), "No se econtraron coincidencias", Toast.LENGTH_SHORT).show();	
-				}
+				Log.v(TAG, content);
 			} catch (Exception e) {
 				/*Toast.makeText(getSherlockActivity(),
 						"Hubo un error al descargar datos", Toast.LENGTH_SHORT)
