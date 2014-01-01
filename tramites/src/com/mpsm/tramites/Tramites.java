@@ -8,10 +8,12 @@ import librerias.ActivityProgress_detalle;
 import librerias.ConstantsUtils;
 import librerias.ProgressFragment;
 import librerias.Tramite_model;
+import librerias.UTF8;
 import librerias.WS;
 import librerias.dialogos;
 import librerias.verifica_internet;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.app.ProgressDialog;
@@ -34,7 +36,7 @@ public class Tramites extends ProgressFragment {
 	// para el polltorefresh
 	public int ESTADO_PULL = 0;
 	private static final String TAG = "Tramites";
-	public UITableView tableView = null;
+	private UITableView tableView = null;
 	PullToRefreshScrollView mPullRefreshScrollView;
 	ScrollView mScrollView;
 
@@ -50,7 +52,7 @@ public class Tramites extends ProgressFragment {
 	int factor = 10;
 	String limite;
 	ProgressDialog pd;
-	String categoria,datos;
+	String categoria, datos;
 	dialogos dialog;
 	private static final String METHOD_NAME = "listarTramitesMovil";
 	String[] nom_variables;
@@ -98,12 +100,12 @@ public class Tramites extends ProgressFragment {
 						limite_entero = limite_entero + 1;
 						para_lista = para_lista + 1;
 						ESTADO_PULL = 1;
-						if(tableView.getCount()>0){
-							obtainData(tableView);	
-						}else{
-						tableView = (UITableView) getView().findViewById(
+						if (tableView.getCount() > 0) {
+							obtainData(tableView);
+						} else {
+							tableView = (UITableView) getView().findViewById(
 									R.id.tableView);
-						obtainData(tableView);
+							obtainData(tableView);
 						}
 
 					}
@@ -115,8 +117,7 @@ public class Tramites extends ProgressFragment {
 		id_tramite1 = new ArrayList<String>();
 		tipo1 = new ArrayList<String>();
 		datos_tramite = new ArrayList<Tramite_model>();
-		tableView = (UITableView) getView().findViewById(
-				R.id.tableView);
+		tableView = (UITableView) getView().findViewById(R.id.tableView);
 		obtainData(tableView);
 	}
 
@@ -126,11 +127,11 @@ public class Tramites extends ProgressFragment {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void obtainData( UITableView param) {
+	private void obtainData(UITableView param) {
 		calculo = limite_entero * factor;
 		limite = "" + calculo;
 		if (verifica_internet.checkConex(getSherlockActivity())) {
-			tarea = new asyncTramites(cadena_buscada,limite,param);
+			tarea = new asyncTramites(cadena_buscada, limite, param);
 			tarea.execute();
 
 		} else {
@@ -147,58 +148,153 @@ public class Tramites extends ProgressFragment {
 		private String codigo, limite;
 
 		// long [] ids;
-		public asyncTramites(String cod,String limit,UITableView param1) {
+		public asyncTramites(String cod, String limit, UITableView param1) {
 			// TODO Auto-generated constructor stub
 			this.tableView1 = param1;
 			this.codigo = cod;
 			this.limite = limit;
 		}
-		
+
 		protected void onPreExecute() {
 			if (ESTADO_PULL != 1) {
-				//setContentShown(false);
+				setContentShown(false);
 				try {
-					String param = URLEncoder.encode("codigo", "UTF-8") + "="
-							+ URLEncoder.encode(this.codigo, "UTF-8");
+					String param = URLEncoder.encode("parametro", "UTF-8")
+							+ "=" + URLEncoder.encode(this.codigo, "UTF-8");
 					param += "&" + URLEncoder.encode("limite", "UTF-8") + "="
 							+ URLEncoder.encode(this.limite, "UTF-8");
 					datos = param;
-				} catch(UnsupportedEncodingException e) {
+
+					Log.v(TAG, datos);
+				} catch (UnsupportedEncodingException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
 			} else {
-				//setContentShown(true);
+				setContentShown(true);
 			}
 		}
-		
+
 		@Override
 		protected Object doInBackground(Object... params) {
-			// TODO Auto-generated method stub
-			
-			objetoBD = new WS(getSherlockActivity().getApplicationContext(),ConstantsUtils.CONTROLLER+METHOD_NAME,datos);
+			// TODO Auto-generated mecodigothod stub
+
+			objetoBD = new WS(getSherlockActivity().getApplicationContext(),
+					ConstantsUtils.CONTROLLER + METHOD_NAME, datos);
 
 			// comprobamos si tenemos conexion a internet
 			content = objetoBD.getResponse();
 			return 1;
 		}
 
-		
-
 		protected void onPostExecute(Object res) {
+			// Log.v("respuesta", content);
 			try {
-				String OutputData = "";
+
+				// //////////////////////////////////
+				
 				JSONObject jsonResponse;
-				ArrayList<String> datosUsusario;
 
-				pd.dismiss();
+				if (ESTADO_PULL != 1) {
+					CustomClickListener listener = new CustomClickListener();
+					tableView1.setClickListener(listener);
+				}
+				setContentShown(true);
+				jsonResponse = new JSONObject(content);
 
-				Log.v(TAG, content);
+				// recuperamos el array
+				JSONArray jsonMainNode = jsonResponse.optJSONArray("Andtroid");
+
+				int lengthJsonArr = jsonMainNode.length();
+				//id_tramite1 = new ArrayList<String>();
+				tipo1 = new ArrayList<String>();
+				if (lengthJsonArr > 0) {
+					for (int i = 0; i < lengthJsonArr; i++) {
+						JSONObject jsonChildNode = jsonMainNode
+								.getJSONObject(i);
+						id_tramite1.add(jsonChildNode.optString("id_tramite")
+								.toString());
+						tipo1.add(jsonChildNode.optString("tipo").toString());
+
+						datos_t = new Tramite_model();
+
+						datos_t.setId_tramite(id_tramite1.get(para_lista + i));// 0
+						datos_t.setTramite(jsonChildNode.optString("tramite")
+								.toString());// 1
+						datos_t.setCodigo(jsonChildNode.optString("codigo")
+								.toString());// 2
+						datos_t.setFecha_inicio(jsonChildNode.optString(
+								"fecha_inicio").toString());// 3
+						datos_t.setSolicitante(jsonChildNode.optString(
+								"solicitante").toString());// 4
+						datos_t.setDni(jsonChildNode.optString("dni")
+								.toString());// 5
+						datos_t.setRuc(jsonChildNode.optString("ruc")
+								.toString());// 6
+						datos_t.setTipo(tipo1.get(para_lista + i));// 7
+						String estado = jsonChildNode.optString("estado")
+								.toString();
+						switch (estado.charAt(0)) {
+						case 'T':
+							estado = "FINALIZADO";
+							break;
+						case 'O':
+							estado = "OBSERVADO";
+							break;
+						case 'A':
+							estado = "EN PROCESO";
+							break;
+						default:
+							break;
+						}
+
+						datos_t.setEstado(estado);// 8
+						datos_t.setNumero_folios(jsonChildNode.optString(
+								"numero_folios").toString());// 9
+						datos_t.setUsuario(jsonChildNode.optString("usuario")
+								.toString());// 10
+
+						datos_tramite.add(datos_t);
+
+					}
+
+				}
+
+				if (ESTADO_PULL == 1) {
+					tableView1.clear();
+				}
+
+				for (int i = 0; i < datos_tramite.size(); i++) {
+					tableView1.addBasicItem(
+							UTF8.convertirA_UTF8(datos_tramite.get(i)
+									.getTramite()),
+							"Código : "
+									+ UTF8.convertirA_UTF8(datos_tramite.get(i)
+											.getCodigo()) + "| fecha: "
+									+ datos_tramite.get(i).getFecha_inicio(),
+							"Solicitante: "
+									+ UTF8.convertirA_UTF8(datos_tramite.get(i)
+											.getSolicitante()), "DNI: "
+									+ datos_tramite.get(i).getDni()
+									+ " | RUC: "
+									+ datos_tramite.get(i).getRuc(), "Estado: "
+									+ datos_tramite.get(i).getEstado()
+									+ " | Tipo: TRÁMITE EXTERNO");
+				}
+
+				tableView1.commit();
+				mPullRefreshScrollView.onRefreshComplete();
+
+				// //////////////////////////////////
+
+				Log.v(TAG + " respuesta", content);
 			} catch (Exception e) {
-				/*Toast.makeText(getSherlockActivity(),
-						"Hubo un error al descargar datos", Toast.LENGTH_SHORT)
-						.show();*/
+				/*
+				 * Toast.makeText(getSherlockActivity(),
+				 * "Hubo un error al descargar datos", Toast.LENGTH_SHORT)
+				 * .show();
+				 */
 
 			}
 		}
