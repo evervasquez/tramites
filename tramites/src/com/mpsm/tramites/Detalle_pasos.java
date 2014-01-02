@@ -21,7 +21,7 @@ public class Detalle_pasos extends SherlockActivity {
 		if (args != null) {
 			datos_pasos = args.getStringArray("datos_pasos");
 		}
-		setTitle(UTF8.convertirA_UTF8(datos_pasos[0]));
+		setTitle(datos_pasos[0]);
 		
 		//cambiando fuente en el actionbar
 		int titleId = Resources.getSystem().getIdentifier("action_bar_title", "id", "android");
@@ -48,8 +48,8 @@ public class Detalle_pasos extends SherlockActivity {
 			}
 		   
 	    	tableView.setClickListener(null);
-	    	tableView.addBasicItem("DATOS DE ENVIO", datos[1].toString()+" "+datos[2].toString(), UTF8.convertirA_UTF8(datos[3].toString()), UTF8.convertirA_UTF8(datos[5].toString()),datos[14].toString());
-	    	tableView.addBasicItem("DATOS DE RECEPCIÓN", datos[7].toString()+" "+datos[8].toString(), UTF8.convertirA_UTF8(datos[9].toString()), UTF8.convertirA_UTF8(datos[11].toString()),datos[14].toString());
+	    	tableView.addBasicItem("DATOS DE ENVIO", datos[1].toString()+" "+datos[2].toString(), datos[3].toString(), datos[5].toString(),datos[14].toString());
+	    	tableView.addBasicItem("DATOS DE RECEPCIÓN", datos[7].toString()+" "+datos[8].toString(), datos[9].toString(), datos[11].toString(),datos[14].toString());
 	  
 	    }
 

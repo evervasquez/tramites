@@ -8,7 +8,6 @@ import librerias.ActivityProgress_detalle;
 import librerias.ConstantsUtils;
 import librerias.ProgressFragment;
 import librerias.Tramite_model;
-import librerias.UTF8;
 import librerias.WS;
 import librerias.dialogos;
 import librerias.verifica_internet;
@@ -100,6 +99,9 @@ public class Tramites extends ProgressFragment {
 						limite_entero = limite_entero + 1;
 						para_lista = para_lista + 1;
 						ESTADO_PULL = 1;
+
+						Log.v(TAG, limite_entero + " - " + para_lista + " - "
+								+ ESTADO_PULL);
 						if (tableView.getCount() > 0) {
 							obtainData(tableView);
 						} else {
@@ -133,7 +135,7 @@ public class Tramites extends ProgressFragment {
 		if (verifica_internet.checkConex(getSherlockActivity())) {
 			tarea = new asyncTramites(cadena_buscada, limite, param);
 			tarea.execute();
-
+			Log.v(TAG, cadena_buscada + " - " + limite);
 		} else {
 			dialog = new dialogos();
 			dialogos.Dialogo_Alerta(getSherlockActivity(),
@@ -158,22 +160,22 @@ public class Tramites extends ProgressFragment {
 		protected void onPreExecute() {
 			if (ESTADO_PULL != 1) {
 				setContentShown(false);
-				try {
-					String param = URLEncoder.encode("parametro", "UTF-8")
-							+ "=" + URLEncoder.encode(this.codigo, "UTF-8");
-					param += "&" + URLEncoder.encode("limite", "UTF-8") + "="
-							+ URLEncoder.encode(this.limite, "UTF-8");
-					datos = param;
-
-					Log.v(TAG, datos);
-				} catch (UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
 			} else {
 				setContentShown(true);
 			}
+			try {
+				String param = URLEncoder.encode("parametro", "UTF-8") + "="
+						+ URLEncoder.encode(this.codigo, "UTF-8");
+				param += "&" + URLEncoder.encode("limite", "UTF-8") + "="
+						+ URLEncoder.encode(this.limite, "UTF-8");
+				datos = param;
+
+				Log.v(TAG, datos);
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		}
 
 		@Override
@@ -189,11 +191,11 @@ public class Tramites extends ProgressFragment {
 		}
 
 		protected void onPostExecute(Object res) {
-			// Log.v("respuesta", content);
+			Log.v("respuesta", content);
 			try {
 
 				// //////////////////////////////////
-				
+
 				JSONObject jsonResponse;
 
 				if (ESTADO_PULL != 1) {
@@ -207,8 +209,7 @@ public class Tramites extends ProgressFragment {
 				JSONArray jsonMainNode = jsonResponse.optJSONArray("Andtroid");
 
 				int lengthJsonArr = jsonMainNode.length();
-				//id_tramite1 = new ArrayList<String>();
-				tipo1 = new ArrayList<String>();
+
 				if (lengthJsonArr > 0) {
 					for (int i = 0; i < lengthJsonArr; i++) {
 						JSONObject jsonChildNode = jsonMainNode
@@ -267,15 +268,15 @@ public class Tramites extends ProgressFragment {
 
 				for (int i = 0; i < datos_tramite.size(); i++) {
 					tableView1.addBasicItem(
-							UTF8.convertirA_UTF8(datos_tramite.get(i)
-									.getTramite()),
+							datos_tramite.get(i)
+									.getTramite(),
 							"Código : "
-									+ UTF8.convertirA_UTF8(datos_tramite.get(i)
-											.getCodigo()) + "| fecha: "
+									+ datos_tramite.get(i)
+											.getCodigo() + "| fecha: "
 									+ datos_tramite.get(i).getFecha_inicio(),
 							"Solicitante: "
-									+ UTF8.convertirA_UTF8(datos_tramite.get(i)
-											.getSolicitante()), "DNI: "
+									+ datos_tramite.get(i)
+											.getSolicitante(), "DNI: "
 									+ datos_tramite.get(i).getDni()
 									+ " | RUC: "
 									+ datos_tramite.get(i).getRuc(), "Estado: "
@@ -288,7 +289,6 @@ public class Tramites extends ProgressFragment {
 
 				// //////////////////////////////////
 
-				Log.v(TAG + " respuesta", content);
 			} catch (Exception e) {
 				/*
 				 * Toast.makeText(getSherlockActivity(),
@@ -305,14 +305,14 @@ public class Tramites extends ProgressFragment {
 				intent = new Intent(getSherlockActivity(),
 						ActivityProgress_detalle.class);
 				String[] data2 = new String[] {
-						datos_tramite.get(index).getId_tramite(),
-						datos_tramite.get(index).getTramite(),
-						datos_tramite.get(index).getCodigo(),
-						datos_tramite.get(index).getFecha_inicio(),
-						datos_tramite.get(index).getSolicitante(),
-						datos_tramite.get(index).getDni(),
-						datos_tramite.get(index).getRuc(),
-						datos_tramite.get(index).getTipo(),
+						datos_tramite.get(index).getId_tramite(),//0
+						datos_tramite.get(index).getTramite(),//1
+						datos_tramite.get(index).getCodigo(),//2
+						datos_tramite.get(index).getFecha_inicio(),//3
+						datos_tramite.get(index).getSolicitante(),//4
+						datos_tramite.get(index).getDni(),//5
+						datos_tramite.get(index).getRuc(),//6
+						datos_tramite.get(index).getTipo(),//7
 						datos_tramite.get(index).getEstado(),
 						datos_tramite.get(index).getNumero_folios(),
 						datos_tramite.get(index).getUsuario()

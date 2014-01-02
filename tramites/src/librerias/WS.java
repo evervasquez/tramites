@@ -11,7 +11,7 @@ import android.content.Context;
 public class WS {
 
 	public static final String	TAG	= "WS";
-	static String urls;
+	public String urls;
 	private String Content;
 	private String Error = null;
 	String param;
@@ -19,7 +19,7 @@ public class WS {
 
 	public WS(Context context, String url, String datos) {
 		this.context = context;
-		WS.urls = url;
+		this.urls = url;
 		this.param = datos;
 	}
 
